@@ -1,6 +1,7 @@
 scripts
 build
 configurator/build
+.vscode
 # Prerequisites
 *.d
 
