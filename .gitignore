@@ -1,4 +1,6 @@
 scripts
+build
+configurator/build
 # Prerequisites
 *.d
 
@@ -51,3 +53,5 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+build
+.vs
