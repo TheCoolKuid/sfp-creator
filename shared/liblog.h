@@ -9,7 +9,7 @@
 
 #define LOG_CONSOLE_INFO(string)                                                                \
 do {                                                                                            \
-    LibLog::LogEngine::Log(std::cout, "[",  LibLog::LogEngine::GetISOTime(), "] ", string);        \
+    LibLog::LogEngine::Log(std::cout, "[",  LibLog::LogEngine::GetISOTime(), "] ", string);     \
 } while(0)
 
 #define LOG_CONSOLE_WARNING(string)                                                             \
