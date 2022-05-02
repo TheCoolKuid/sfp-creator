@@ -12,6 +12,17 @@
 namespace JSON
 {
 	template <typename CharT>
+	class IJObject;
+	template <typename CharT>
+	class JValue;
+	template <typename CharT>
+	class JArray;
+	template <typename CharT>
+	class JObject;
+	template <typename CharT>
+	class JSONParser;
+
+	template <typename CharT>
 	class IJObject
 	{
 	public:
@@ -31,13 +42,13 @@ namespace JSON
 		size_t FindPair(CharT open, CharT close, size_t whom)
 		{
 			int oc = 0;
-			for (size_t i = whom; i < JSrc.size(); i++)
+			for (size_t i = whom; i < this->JSrc.size(); i++)
 			{
-				if (JSrc[i] == open)
+				if (this->JSrc[i] == open)
 				{
 					oc++;
 				}
-				if (JSrc[i] == close)
+				if (this->JSrc[i] == close)
 				{
 					oc--;
 					if (!oc)
@@ -52,7 +63,7 @@ namespace JSON
 		void ClearString()
 		{
 			//удаляем все ненужные символы
-			JSrc.erase(std::remove_if(JSrc.begin(), JSrc.end(), [=, isQuotes = false](wchar_t x) mutable
+			this->JSrc.erase(std::remove_if(this->JSrc.begin(), this->JSrc.end(), [=, isQuotes = false](wchar_t x) mutable
 									  {
 							if (x == this->charset.quotes)
 							{
@@ -60,16 +71,16 @@ namespace JSON
 							}
 							return (isQuotes) ? false : 
 							x == this->charset.space || x == this->charset.newline || x == this->charset.carret_return; }),
-					   JSrc.end());
+					   this->JSrc.end());
 			// remove \\ separators
 			do
 			{
-				size_t pos = JSrc.find(this->charset.win_path_separator);
+				size_t pos = this->JSrc.find(this->charset.win_path_separator);
 				if (pos != std::basic_string<CharT>::npos)
 				{
-					JSrc.erase(JSrc.begin() + pos);
+					this->JSrc.erase(this->JSrc.begin() + pos);
 				}
-			} while (JSrc.find(this->charset.win_path_separator) != std::basic_string<CharT>::npos);
+			} while (this->JSrc.find(this->charset.win_path_separator) != std::basic_string<CharT>::npos);
 		}
 
 		struct CharSet
@@ -151,11 +162,11 @@ namespace JSON
 		JArray(std::basic_string<CharT> &&src) : IJObject<CharT>(std::move(src)) {}
 		virtual std::map<std::basic_string<CharT>, std::unique_ptr<IJObject<CharT>>> Value()
 		{
-			size_t end = FindPair(this->charset.array_begin, this->charset.array_close, 0);
+			size_t end = this->FindPair(this->charset.array_begin, this->charset.array_close, 0);
 			if (end != std::basic_string<CharT>::npos)
 			{
 				std::map<std::basic_string<CharT>, std::unique_ptr<JSON::IJObject<CharT>>> out;
-				
+
 				size_t fblock_start = 1;
 				size_t fblock_stop = 0;
 				size_t foffset = 1; //указывает на следующий парный символ
@@ -164,39 +175,39 @@ namespace JSON
 
 				do
 				{
-					if (JSrc[fblock_start] == this->charset.closure_begin)
+					if (this->JSrc[fblock_start] == this->charset.closure_begin)
 					{
-						fblock_stop = FindPair(this->charset.closure_begin, this->charset.closure_end, fblock_start);
+						fblock_stop = this->FindPair(this->charset.closure_begin, this->charset.closure_end, fblock_start);
 						if (fblock_stop != -1)
 						{
-							// auto src = JSrc.substr(fblock_start, fblock_stop - fblock_start + 1);
-							out[to_string(kcount)] = std::make_unique<JObject<CharT>>(
-								JSrc.substr(fblock_start, fblock_stop - fblock_start + 1));
+							// auto src = this->JSrc.substr(fblock_start, fblock_stop - fblock_start + 1);
+							out[this->to_string(kcount)] = std::make_unique<JObject<CharT>>(
+								this->JSrc.substr(fblock_start, fblock_stop - fblock_start + 1));
 							fblock_start = fblock_stop + 2;
 						}
 					}
-					if (JSrc[fblock_start] == this->charset.array_begin)
+					if (this->JSrc[fblock_start] == this->charset.array_begin)
 					{
-						fblock_stop = FindPair(this->charset.array_begin, this->charset.array_close, fblock_start);
+						fblock_stop = this->FindPair(this->charset.array_begin, this->charset.array_close, fblock_start);
 						if (fblock_stop != -1)
 						{
-							// auto src = JSrc.substr(fblock_start, fblock_stop - fblock_start + 1);
-							out[to_string(kcount)] = std::make_unique<JArray<CharT>>(
-								JSrc.substr(fblock_start, fblock_stop - fblock_start + 1));
+							// auto src = this->JSrc.substr(fblock_start, fblock_stop - fblock_start + 1);
+							out[this->to_string(kcount)] = std::make_unique<JArray<CharT>>(
+								this->JSrc.substr(fblock_start, fblock_stop - fblock_start + 1));
 							fblock_start = fblock_stop + 2;
 						}
 					}
-					if (JSrc[fblock_start] != this->charset.closure_begin && JSrc[fblock_start] != this->charset.array_begin)
+					if (this->JSrc[fblock_start] != this->charset.closure_begin && this->JSrc[fblock_start] != this->charset.array_begin)
 					{
-						if (JSrc[fblock_start] == this->charset.quotes)
+						if (this->JSrc[fblock_start] == this->charset.quotes)
 						{
 							fblock_start++; //+1 символ т.к. кавычки нам не нужны
 
-							fblock_stop = JSrc.find(this->charset.quotes, fblock_start + 1);
+							fblock_stop = this->JSrc.find(this->charset.quotes, fblock_start + 1);
 						}
 						else
 						{
-							fblock_stop = JSrc.find(this->charset.comma, fblock_start);
+							fblock_stop = this->JSrc.find(this->charset.comma, fblock_start);
 							if (fblock_stop == std::basic_string<CharT>::npos) //если точек нет то читаем до конца
 							{
 								fblock_stop = end;
@@ -208,9 +219,9 @@ namespace JSON
 						{
 							if (fblock_stop != fblock_start) //Если они равны, то скорее всего неверный символ
 							{
-								// auto src = JSrc.substr(fblock_start, fblock_stop - fblock_start);
-								out[to_string(kcount)] = std::make_unique<JValue<CharT>>(
-									JSrc.substr(fblock_start, fblock_stop - fblock_start));
+								// auto src = this->JSrc.substr(fblock_start, fblock_stop - fblock_start);
+								out[this->to_string(kcount)] = std::make_unique<JValue<CharT>>(
+									this->JSrc.substr(fblock_start, fblock_stop - fblock_start));
 							}
 							fblock_start = fblock_stop + 1;
 						}
@@ -218,7 +229,7 @@ namespace JSON
 
 					kcount++;
 
-				} while (fblock_stop != std::basic_string<CharT>::npos && fblock_stop != -1 && fblock_start < JSrc.length());
+				} while (fblock_stop != std::basic_string<CharT>::npos && fblock_stop != -1 && fblock_start < this->JSrc.length());
 
 				return out;
 			}
@@ -233,7 +244,7 @@ namespace JSON
 		JObject(std::basic_string<CharT> &&src) : IJObject<CharT>(std::move(src)) {}
 		virtual std::map<std::basic_string<CharT>, std::unique_ptr<IJObject<CharT>>> Value()
 		{
-			size_t end = FindPair(this->charset.closure_begin, this->charset.closure_end, 0);
+			size_t end = this->FindPair(this->charset.closure_begin, this->charset.closure_end, 0);
 			if (end != -1)
 			{
 				std::map<std::basic_string<CharT>, std::unique_ptr<JSON::IJObject<CharT>>> out;
@@ -242,7 +253,7 @@ namespace JSON
 				size_t foffset = 1; //указывает на следующий парный символ
 				do
 				{
-					fcolon = JSrc.find(this->charset.colon, foffset);
+					fcolon = this->JSrc.find(this->charset.colon, foffset);
 					if (fcolon != std::basic_string<CharT>::npos)
 					{
 						size_t close = 0;
@@ -250,37 +261,37 @@ namespace JSON
 
 						int shiftNeed = 0;
 
-						if (JSrc[fcolon + 1] == this->charset.closure_begin)
+						if (this->JSrc[fcolon + 1] == this->charset.closure_begin)
 						{
-							close = FindPair(this->charset.closure_begin, this->charset.closure_end, fcolon + 1);
+							close = this->FindPair(this->charset.closure_begin, this->charset.closure_end, fcolon + 1);
 							if (close == -1)
-								throw std::exception("missing }");
+								throw std::invalid_argument("missing }");
 						}
-						if (JSrc[fcolon + 1] == this->charset.array_begin)
+						if (this->JSrc[fcolon + 1] == this->charset.array_begin)
 						{
 							type = 1;
-							close = FindPair(this->charset.array_begin, this->charset.array_close, fcolon + 1);
+							close = this->FindPair(this->charset.array_begin, this->charset.array_close, fcolon + 1);
 							if (close == -1)
-								throw std::exception("missing ]");
+								throw std::invalid_argument("missing ]");
 						}
-						if (JSrc[fcolon + 1] != this->charset.closure_begin && JSrc[fcolon + 1] != this->charset.array_begin)
+						if (this->JSrc[fcolon + 1] != this->charset.closure_begin && this->JSrc[fcolon + 1] != this->charset.array_begin)
 						{
 							type = 2;
-							if (JSrc[fcolon + 1] == this->charset.quotes)
+							if (this->JSrc[fcolon + 1] == this->charset.quotes)
 							{
 								shiftNeed = 1;
-								close = JSrc.find(this->charset.quotes, fcolon + 2); //т.к. на +1 - начинающие кавычки
+								close = this->JSrc.find(this->charset.quotes, fcolon + 2); //т.к. на +1 - начинающие кавычки
 								if (close == std::basic_string<CharT>::npos)
-									throw std::exception("missing \"");
+									throw std::invalid_argument("missing \"");
 							}
 							else
 							{
-								close = JSrc.find(this->charset.comma, fcolon) - 1; //-1 - т.к. указывать будет ровно на запятую
+								close = this->JSrc.find(this->charset.comma, fcolon) - 1; //-1 - т.к. указывать будет ровно на запятую
 								if (close + 1 == std::basic_string<CharT>::npos)
 								{
 									close = end - 1;
 									if (fcolon > close)
-										throw std::exception("missing data after :");
+										throw std::invalid_argument("missing data after :");
 								}
 							}
 						}
@@ -288,15 +299,15 @@ namespace JSON
 						std::basic_string<CharT> src;
 						if (type == 2 && shiftNeed)
 						{
-							src = JSrc.substr(fcolon + 2, close - (fcolon + 2)); //+2 т.к. избегаем \"
+							src = this->JSrc.substr(fcolon + 2, close - (fcolon + 2)); //+2 т.к. избегаем \"
 						}
 						else
 						{
-							src = JSrc.substr(fcolon + 1, close - fcolon);
+							src = this->JSrc.substr(fcolon + 1, close - fcolon);
 						}
 
-						// auto src = JSrc.substr(fcolon + 1, close - fcolon);
-						auto key = JSrc.substr(foffset, fcolon - foffset);
+						// auto src = this->JSrc.substr(fcolon + 1, close - fcolon);
+						auto key = this->JSrc.substr(foffset, fcolon - foffset);
 
 						foffset = close + 2; //+2 т.к. } , {
 
@@ -333,7 +344,7 @@ namespace JSON
 			}
 			else
 			{
-				throw std::exception("Invalid json object");
+				throw std::invalid_argument("Invalid json object");
 			}
 		}
 	};
@@ -362,26 +373,21 @@ namespace JSON
 		// std::unique_ptr<IJObject<CharT>> Parse();
 		std::unique_ptr<IJObject<CharT>> Parse()
 		{
-			UniversalSCParser::UTF8FileParser Parser(Path);
-			auto content = Parser.Read();
+			auto content = Read();
 
 			for (size_t i = 0; i < content.size(); i++)
 			{
-				switch (content[i])
+				if (content[i] == object)
 				{
-				case object:
 					return std::make_unique<JSON::JObject<CharT>>(std::move(content));
-					break;
-				case array:
+				}
+				if (content[i] == array)
+				{
 					return std::make_unique<JSON::JArray<CharT>>(std::move(content));
-					break;
-				default:
-					return std::make_unique<JSON::JValue<CharT>>(std::move(content));
-					break;
 				}
 			}
 
-			throw std::exception("invalid json object");
+			throw std::invalid_argument("invalid json object");
 		}
 
 	private:
@@ -398,6 +404,5 @@ namespace JSON
 			return std::basic_string<CharT>(buffer.get(), size);
 		}
 	};
-
 }
 #endif // JSON_H
