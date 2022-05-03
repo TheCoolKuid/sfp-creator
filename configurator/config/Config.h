@@ -13,6 +13,8 @@ namespace SFPConfig {
         std::filesystem::path OnCreatorPath; // Creator creates a patch and describes where files are at Creator side
         // put the file at this address
         std::string RelativeUserPath; // where to store the file on unpack
+    //    size_t UncompressedSize; // file size before compression
+    //    int crc32;
     };
 
 
@@ -42,7 +44,7 @@ namespace SFPConfig {
 
 
 
-    }
+    };
 }
 
 #endif

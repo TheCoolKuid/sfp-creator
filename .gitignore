@@ -2,6 +2,7 @@ scripts
 build
 configurator/build
 .vscode
+lz4
 # Prerequisites
 *.d
 
