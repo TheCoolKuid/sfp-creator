@@ -13,6 +13,7 @@
 
 namespace archiver
 {
+
     class archiver
     {
     public:
@@ -25,13 +26,14 @@ namespace archiver
         };
         /**
          * @brief compress file at specified path
+         * 
          * @param f_name path to file
          */
         static CompressedDataDefinition compress(const std::filesystem::path &f_name);
         /**
          * @brief decompress data
          *
-         * @param src ptr to data
+         * @param src ptr to data --- where particulaar block starts in the overall data
          * @param compressedSize byte size of compressed block
          * @param originSize origin size of data
          * @return std::unique_ptr<char[]> unique_ptr of decompressed data
