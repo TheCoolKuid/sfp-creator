@@ -28,7 +28,7 @@ do {                                                                            
     #define LOG_CONSOLE_DEBUG(string)                       \
     do {                                                    \
         LibLog::LogEngine::Log(std::cout,                   \
-        "[",  LibLog::LogEngine::GetISOTime(), "] [DEBUG] ",\
+        "[ ",  LibLog::LogEngine::GetISOTime(), "] [DEBUG] ",\
         "File ", __FILE__ ,                                 \
         " Line ", __LINE__,                                 \
         " Msg: ", string);                                  \
