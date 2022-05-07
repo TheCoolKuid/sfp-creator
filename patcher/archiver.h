@@ -3,10 +3,11 @@
 #include <vector>
 
 #include "../archiver/archiver.h"
+#include "../lz4/lz4/lib/lz4file.h"
 
 extern const std::uint8_t data[]; // vector of compressed bytes --- stack of compressed files
 extern const uint8_t control[];   // vector of structs FileMemoryDefinition_t
-extern const uint8_t archive[];   // vector of FileArchiveDefinition_t
+extern const uint8_t archive[];   // two size_t values representing FileArchiveDefinition_t struct
 
 namespace Unpacker
 {
@@ -35,9 +36,29 @@ namespace Unpacker
          * @brief unpacks compressed files
          * @param packedFilesHandler vector of structs describing compressed data-files
          */
-        std::vector<UnCompressedDataDefinition> Unpack(const std::vector<archiver::archiver::CompressedDataDefinition> &packedFilesHandler);
+        void Unpack();
 
     private:
         std::filesystem::path user_path{};
+
+        /**
+         * @brief decompress temprorary file to its new location
+         * @param tmp compressed temporary file descriptor
+         * @param file output stream binded to the decompressed location
+         */
+        void DecompressFile(FILE *tmp, std::ofstream &file);
+
+        /**
+         * @brief handles a single compressed file: copies it from archive.c to temp and
+         * calls DecompressFile()
+         *
+         * @param offset compressed file position at control[] of archive.c
+         * @param size compressed file size
+         * @param relative_path relative path to the patch file destination
+         * @return complete path to the patched file on user computer
+         */
+        std::filesystem::path HandleFile(size_t offset, size_t size, const char *relative_path);
+
+        bool IsFileCorrect(const std::filesystem::path &path, const FileMemoryDefinition *compressedfile);
     };
 } // Unpacker

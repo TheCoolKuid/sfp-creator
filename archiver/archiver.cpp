@@ -1,3 +1,4 @@
+#include <filesystem>
 #include "archiver.h"
 
 archiver::archiver::CompressedDataDefinition
@@ -92,6 +93,31 @@ archiver::archiver::crc32b(const char *src, size_t size)
     }
     return ~crc;
 }
+
+    unsigned int
+    archiver::archiver::crc32b(const std::filesystem::path& path)
+    {
+        std::ifstream stream(path);
+
+        int i, j;
+        unsigned int byte, crc, mask;
+
+        i = 0;
+        crc = 0xFFFFFFFF;
+
+        while (stream >> byte)
+        {
+            crc = crc ^ byte;
+            for (j = 7; j >= 0; j--)
+            { // Do eight times.
+                mask = -(crc & 1);
+                crc = (crc >> 1) ^ (0xEDB88320 & mask);
+            }
+            i = i + 1;
+        }
+        stream.close();
+        return ~crc;
+    }
 
 archiver::ArchiveBuilder::ArchiveBuilder()
 {
