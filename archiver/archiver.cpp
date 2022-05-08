@@ -1,3 +1,4 @@
+#include <filesystem>
 #include "archiver.h"
 
 archiver::archiver::CompressedDataDefinition
@@ -75,7 +76,8 @@ unsigned int
 archiver::archiver::crc32b(const char *src, size_t size)
 {
     int i, j;
-    unsigned int byte, crc, mask;
+    unsigned int crc, mask;
+    char byte;
 
     i = 0;
     crc = 0xFFFFFFFF;
@@ -88,8 +90,35 @@ archiver::archiver::crc32b(const char *src, size_t size)
             mask = -(crc & 1);
             crc = (crc >> 1) ^ (0xEDB88320 & mask);
         }
-        i = i + 1;
     }
+    return ~crc;
+}
+
+unsigned int
+archiver::archiver::crc32b(const std::filesystem::path &path)
+{
+    std::ifstream stream(path, std::ios::binary);
+    if (!stream.is_open())
+    {
+        throw std::runtime_error("Fail. Unable to open stream");
+    }
+
+    int j;
+    unsigned int crc, mask;
+    char byte;
+
+    crc = 0xFFFFFFFF;
+    stream >> std::noskipws; //< this is to read whitespaces as well
+    while (stream >> byte)
+    {
+        crc = crc ^ byte;
+        for (j = 7; j >= 0; j--)
+        { // Do eight times.
+            mask = -(crc & 1);
+            crc = (crc >> 1) ^ (0xEDB88320 & mask);
+        }
+    }
+    stream.close();
     return ~crc;
 }
 
@@ -157,7 +186,7 @@ void archiver::ArchiveBuilder::ArchiveWriter::AddSection(ArchiveBuilder::Archive
         break;
     default:
         LOG_CONSOLE_DEBUG("unrecognised enum was passed to AddSection");
-    break;
+        break;
     }
 }
 
@@ -199,16 +228,17 @@ archiver::ArchiveBuilder::ArchiveWriter::~ArchiveWriter()
     }
 }
 
-void archiver::ArchiveBuilder::AddFiles(const std::vector<ArchiveBuilder::FileReplacmentConfig> &config) {
+void archiver::ArchiveBuilder::AddFiles(const std::vector<ArchiveBuilder::FileReplacmentConfig> &config)
+{
     writer->AddSection(ArchiveBuilder::ArchiveWriter::Sections::Data);
-    for(const auto& cnf : config) {
+    for (const auto &cnf : config)
+    {
         AddFile(cnf);
     }
 
     writer->AddSection(ArchiveBuilder::ArchiveWriter::Sections::FileControl);
-    writer->WriteToSection(reinterpret_cast<char*>(files.data()), sizeof(FileMemoryDefinition_t) * files.size());
+    writer->WriteToSection(reinterpret_cast<char *>(files.data()), sizeof(FileMemoryDefinition_t) * files.size());
 
     writer->AddSection(ArchiveBuilder::ArchiveWriter::Sections::ArchiveControl);
-    writer->WriteToSection(reinterpret_cast<char*>(&files_def), sizeof(FileArchiveDefinition_t));
-
+    writer->WriteToSection(reinterpret_cast<char *>(&files_def), sizeof(FileArchiveDefinition_t));
 }
