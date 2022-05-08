@@ -46,6 +46,13 @@ namespace archiver
          * @return unsigned int crc32
          */
         static unsigned int crc32b(const char *src, size_t size);
+
+        /**
+         * @brief calculate crc32 of a file
+         * src: https://web.archive.org/web/20190108202303/http://www.hackersdelight.org/hdcodetxt/crc.c.txt
+         * @param path path to the file
+         */
+        static unsigned int crc32b(const std::filesystem::path& path);
     };
 
     class ArchiveBuilder
