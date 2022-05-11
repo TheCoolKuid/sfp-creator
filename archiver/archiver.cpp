@@ -160,7 +160,7 @@ void archiver::ArchiveBuilder::AddFile(const FileReplacmentConfig &conf)
     {
         std::string msg = "Add file error. Error: ";
         msg += +err.what();
-        LOG_CONSOLE_ERROR(msg);
+        LibLog::LogEngine::LogConsoleError(msg);
     }
 }
 

@@ -60,5 +60,8 @@ namespace Unpacker
         std::filesystem::path HandleFile(size_t offset, size_t size, const char *relative_path);
 
         bool IsFileCorrect(const std::filesystem::path &path, const FileMemoryDefinition *compressedfile);
+
+        void BackUpFile(const char *relative_path);
+        void RestoreFile(const char *relative_path);
     };
 } // Unpacker
