@@ -3,7 +3,7 @@
 #include <string>
 #include <filesystem>
 
-#include "archiver.h"
+#include "patcher.h"
 #include "../archiver/archiver.h"
 #include "../shared/path_lib.h"
 
@@ -21,7 +21,7 @@ namespace Unpacker
         LZ4F_errorCode_t ret = LZ4F_OK_NoError;
         LZ4_readFile_t *lz4fRead;
 
-        constexpr uint8_t buf_size = 1024;
+        constexpr uint16_t buf_size = 1024;
         auto buffer = std::make_unique<char[]>(buf_size);
 
         if (LZ4F_isError(LZ4F_readOpen(&lz4fRead, tmp)))
@@ -49,8 +49,13 @@ namespace Unpacker
             throw std::runtime_error("Unable to write compressed data at offset position = " + std::to_string(offset) + ".");
         }
 
+<<<<<<< HEAD:patcher/archiver.cpp
         auto path = PathUtils::Path::Append(user_path, relative_path);
         std::ofstream out(path); //< where to write the decompssed file on disk
+=======
+        auto path{user_path.append(relative_path)};
+        std::ofstream out(path); //< where to write the decompressed file on disk
+>>>>>>> 921a1cd (feat: unpacker compiled):patcher/patcher.cpp
 
         DecompressFile(tmp, out);
 
@@ -73,6 +78,7 @@ namespace Unpacker
         {
             auto ptr = (FileMemoryDefinition *)control + i; // TODO: it was ARCHIVE here. I consider it an error
 
+<<<<<<< HEAD:patcher/archiver.cpp
             LibLog::LogEngine::LogConsoleInfo("Processing file ", ptr->relative_path, " Creating backup");
             try
             {
@@ -85,10 +91,15 @@ namespace Unpacker
                     ptr->relative_path,
                     err.what());
             }
+=======
+         //   BackUpFile(); // TODO: backup each file in a temp folder with the same directory structure as the pached files
+
+>>>>>>> 921a1cd (feat: unpacker compiled):patcher/patcher.cpp
             auto path = HandleFile(ptr->offset, ptr->compressedSize, ptr->relative_path);
 
             if (!IsFileCorrect(path, ptr))
             {
+<<<<<<< HEAD:patcher/archiver.cpp
                 try
                 {
                     RestoreFile(ptr->relative_path);
@@ -104,6 +115,9 @@ namespace Unpacker
                     "File ",
                     ptr->relative_path,
                     " size or crc32 of original file and uncompressed file are not agree.");
+=======
+                throw std::runtime_error("File size or crc32 of original file and uncompressed file do not agree.");
+>>>>>>> 921a1cd (feat: unpacker compiled):patcher/patcher.cpp
             }
         }
 

@@ -7,6 +7,7 @@ enable_testing()
 
 add_subdirectory(lz4/lz4/build/cmake)
 add_subdirectory(archiver)
+add_subdirectory(patcher)
 
 add_subdirectory(configurator)
 
