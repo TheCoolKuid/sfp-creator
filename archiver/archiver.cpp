@@ -124,7 +124,7 @@ archiver::archiver::crc32b(const std::filesystem::path &path)
 
 archiver::ArchiveBuilder::ArchiveBuilder()
 {
-    archive_file = std::ofstream("./patch/archive.c");
+    archive_file = std::ofstream("./patcher/archive.h");
     writer = std::make_unique<ArchiveWriter>(archive_file);
 }
 
