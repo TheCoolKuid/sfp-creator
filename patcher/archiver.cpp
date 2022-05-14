@@ -5,6 +5,7 @@
 
 #include "archiver.h"
 #include "../archiver/archiver.h"
+#include "../shared/path_lib.h"
 
 namespace Unpacker
 {
@@ -48,7 +49,7 @@ namespace Unpacker
             throw std::runtime_error("Unable to write compressed data at offset position = " + std::to_string(offset) + ".");
         }
 
-        auto path{user_path.append(relative_path)};
+        auto path = PathUtils::Path::Append(user_path, relative_path);
         std::ofstream out(path); //< where to write the decompssed file on disk
 
         DecompressFile(tmp, out);
@@ -66,19 +67,47 @@ namespace Unpacker
         auto files_count = _arch.SizeOfFMMArray; // number of compressed files
         auto size = _arch.SizeOfData;
 
+        LibLog::LogEngine::LogConsoleInfo("Replacement begins");
+
         for (int i = 0; i < files_count; i++)
         {
             auto ptr = (FileMemoryDefinition *)control + i; // TODO: it was ARCHIVE here. I consider it an error
 
-            BackUpFile(); // TODO: backup each file in a temp folder with the same directory structure as the pached files
-
+            LibLog::LogEngine::LogConsoleInfo("Processing file ", ptr->relative_path, " Creating backup");
+            try
+            {
+                BackUpFile(ptr->relative_path); // TODO: backup each file in a temp folder with the same directory structure as the pached files
+            }
+            catch (std::exception err)
+            {
+                LibLog::LogEngine::LogConsoleError(
+                    "File ",
+                    ptr->relative_path,
+                    err.what());
+            }
             auto path = HandleFile(ptr->offset, ptr->compressedSize, ptr->relative_path);
 
             if (!IsFileCorrect(path, ptr))
             {
-                throw std::runtime_error("File size or crc32 of original file and uncompressed file are not agree.");
+                try
+                {
+                    RestoreFile(ptr->relative_path);
+                }
+                catch (std::exception err)
+                {
+                    LibLog::LogEngine::LogConsoleError(
+                        "File ",
+                        ptr->relative_path,
+                        err.what());
+                }
+                LibLog::LogEngine::LogConsoleError(
+                    "File ",
+                    ptr->relative_path,
+                    " size or crc32 of original file and uncompressed file are not agree.");
             }
         }
+
+        LibLog::LogEngine::LogConsoleInfo("Replacement completed");
     }
 
     bool Unpacker::IsFileCorrect(const std::filesystem::path &path, const FileMemoryDefinition *compressedFile)
@@ -88,4 +117,31 @@ namespace Unpacker
                std::filesystem::file_size(path) == compressedFile->originSize;
     }
 
+    void Unpacker::BackUpFile(const char *relative_path)
+    {
+        auto old_path = PathUtils::Path::Append(user_path, relative_path);
+        auto new_path = PathUtils::Path::Append(old_path, ".bal");
+        if (!std::filesystem::copy_file(old_path, new_path))
+        {
+            throw std::runtime_error("unable to create backup file");
+        }
+    }
+
+    void Unpacker::RestoreFile(const char *relative_path)
+    {
+        auto origin = PathUtils::Path::Append(user_path, relative_path);
+        auto backup = PathUtils::Path::Append(origin, ".bal");
+        if (std::filesystem::exists(backup))
+        {
+            std::filesystem::copy_file(backup, origin);
+            if (!std::filesystem::remove(backup))
+            {
+                throw std::runtime_error("unable to delete backup file");
+            }
+        }
+        else
+        {
+            throw std::runtime_error("backup file not found");
+        }
+    }
 } // Unpacker

@@ -87,7 +87,7 @@ namespace archiver
 
             
         private:
-            const char *DataSection = "#include <cstdint>\nconst uint8_t data[] = {";
+            const char *DataSection = "const uint8_t data[] = {";
             const char *FileControlSection = "const uint8_t control[] = {";
             const char *ArchiveControlSection = "const uint8_t archive[] = {";
             const char *SectionEnd = "};\n";

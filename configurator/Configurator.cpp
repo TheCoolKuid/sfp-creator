@@ -1,35 +1,66 @@
-#include "../shared/liblog.h"
 #include <filesystem>
 
-int main(
-    int argc,
-    #ifdef __GNUC__
+#include "../shared/liblog.h"
+#include "../shared/path_lib.h"
+#include "../shared/utils.h"
+#include "config/Config.h"
+
+
+int
+#if defined(unix) || defined(__unix__) || defined(__unix)
+    main
+#endif
+#if defined(_WIN32) || defined(__CYGWIN__)
+    wmain
+#endif
+    (
+        int argc,
+#if defined(unix) || defined(__unix__) || defined(__unix)
         char
-    #endif
-    #ifdef _MSC_BUILD
+#endif
+#if defined(_WIN32) || defined(__CYGWIN__)
         wchar_t
-    #endif
-    ** argv
-) {
+#endif
+        **argv)
+{
+    if(HasAdminRights()) {
+        LibLog::LogEngine::LogConsoleWarn("Program runs with admin privileges. Hope you know what you doing");
+    }
+
     std::filesystem::path config_path;
     /* first arg may be json config file or dir
-    *  if dir was specified sfp_config.json appends 
-    *  if no arg was specified ./sfp_config.json assumes as config
-    */
-    if(argc > 1){
+     *  if dir was specified sfp_config.json appends
+     *  if no arg was specified ./sfp_config.json assumes as config
+     */
+    if (argc > 1)
+    {
         config_path = std::filesystem::path(argv[1]);
-        if (std::filesystem::is_directory(config_path)) {
-            config_path.append("sfp_config.json");
+        if (std::filesystem::is_directory(config_path))
+        {
+            config_path = PathUtils::Path::Append(config_path, "sfp_config.json");
         }
-    }else{
+    }
+    else
+    {
         config_path = std::filesystem::path("./sfp_config.json");
     }
 
-    if(!std::filesystem::exists(config_path)){
-        LOG_CONSOLE_ERROR("no config file was found.\n Use syntax:\n configurator <path_to_config>\n or create sfp_config.json in program dir");
+    if (!std::filesystem::exists(config_path))
+    {
+        LibLog::LogEngine::LogConsoleError("no config file was found.\n Use syntax:\n configurator <path_to_config>\n or create sfp_config.json in program dir");
         return -1;
     }
 
-    LOG_CONSOLE_INFO("config file has found at " + config_path.string());
+    LibLog::LogEngine::LogConsoleInfo("config file found at ", config_path);
+    LibLog::LogEngine::LogConsoleInfo("Reading config");
+
+    SFPConfig::JSONConfigFiller parser(config_path);
+    auto config = parser.Create();
+
+    SFPConfig::RuleChecker checker;
+    if(!checker.Check(config)) {
+         LibLog::LogEngine::LogConsoleError("Invalid config. Please check and try again.");
+         return -1;
+    }
 
 }

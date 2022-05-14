@@ -1,0 +1,15 @@
+{
+    "executable_name" : "",
+    "add_build_command" : "amd64",
+    "cmake_path" : "LeaveEmpty/Path",
+    "gcc_path" : "LeaveEmpty/Path",
+    "fileReplacement" : {
+        "Destination" : "Path/AskUser/Registry",
+        "Files" : [
+            {
+                "OnCreatorPath" : "",
+                "RelativeUserPath" : ""
+            }
+        ]
+    }
+}
