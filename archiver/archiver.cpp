@@ -1,4 +1,3 @@
-#include <filesystem>
 #include "archiver.h"
 
 archiver::archiver::CompressedDataDefinition

@@ -10,7 +10,6 @@
 #ifdef NDEBUG
 #define LOG_CONSOLE_DEBUG(string) ((void)0)
 #else
-
 #define LOG_CONSOLE_DEBUG(string)                                                  \
     do                                                                             \
     {                                                                              \
@@ -19,7 +18,6 @@
                                "File ", __FILE__,                                  \
                                " Line ", __LINE__,                                 \
                                " Msg: ", string);                                  \
-
     } while (0)
 #endif
 
