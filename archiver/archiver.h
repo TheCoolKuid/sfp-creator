@@ -6,6 +6,7 @@
 #include <memory>
 #include <fstream>
 #include <cstring>
+#include <vector>
 
 #include "../external_libs/lib_lz4/lz4.h"
 #include "archive_structs.h"

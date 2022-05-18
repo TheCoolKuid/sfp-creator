@@ -10,9 +10,9 @@ target_compile_features(ArchiverTest PRIVATE cxx_std_17)
 target_compile_features(ArchiverTestGenerate PRIVATE cxx_std_17)
 target_compile_features(CRC32OfFile PRIVATE cxx_std_17)
 
-target_link_libraries(ArchiverTest archiver)
-target_link_libraries(ArchiverTestGenerate archiver)
-target_link_libraries(CRC32OfFile archiver)
+target_link_libraries(ArchiverTest archiver lz4)
+target_link_libraries(ArchiverTestGenerate archiver lz4)
+target_link_libraries(CRC32OfFile archiver lz4)
 
 add_test(ArchiverTestt_t ArchiverTest)
 add_test(ArchiverTestGenerate_t ArchiverTestGenerate)

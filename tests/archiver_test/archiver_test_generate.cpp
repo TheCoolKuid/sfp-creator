@@ -3,7 +3,7 @@
 #include <cstdio>
 
 int main() {
-    std::filesystem::create_directory("./patch");
+    std::filesystem::create_directory("./patcher");
 
     auto archive = archiver::ArchiveBuilder();
 
