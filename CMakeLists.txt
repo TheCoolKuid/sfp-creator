@@ -5,7 +5,12 @@ project(SFP)
 
 enable_testing()
 
-add_subdirectory(lz4/lz4/build/cmake)
+if(MSVC)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    set(BUILD_SHARED_LIBS TRUE)
+endif()
+
+add_subdirectory(external_libs)
 add_subdirectory(archiver)
 add_subdirectory(patcher)
 

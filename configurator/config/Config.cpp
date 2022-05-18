@@ -62,11 +62,11 @@ bool SFPConfig::PathCheckRule::_Check(const SFPConfig::Config &conf) const
 
     const std::regex win_path_regex("^\\w:\\\\([^<>:;,?\"*|]+$)");
     const std::regex unix_path_regex("^/([^<>:;,?\"*|]+/*$)");
-    const std::regex essential_regex("(windows|bin|boot|lib|proc|root|sys)", std::regex_constants::icase);
+    const std::regex essential_regex("(windows|/bin|/boot|/lib|/proc|/root|/sys)", std::regex_constants::icase);
     std::smatch match;
     return (std::regex_match(conf.fileReplacement_Destination, match, win_path_regex) ||
             std::regex_match(conf.fileReplacement_Destination, match, unix_path_regex)) &&
-           std::regex_match(conf.fileReplacement_Destination, match, essential_regex);
+           !std::regex_match(conf.fileReplacement_Destination, match, essential_regex);
 }
 
 std::string SFPConfig::PathCheckRule::ErrMsg()  const

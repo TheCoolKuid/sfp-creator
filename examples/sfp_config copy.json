@@ -1,0 +1,31 @@
+{
+    "executable_name" : "patche",
+    "add_build_command" : "amd64",
+    "cmake_path" : "",
+    "gcc_path" : "",
+    "fileReplacement" : {
+        "Destination" : "D:\\software_patch_creator\\examples\\",
+        "Files" : [
+            {
+                "OnCreatorPath" : "C:\\Users\\tporyvaev\\Documents\\alm_liquid.cpg",
+                "RelativeUserPath" : "Documents\\alm_liquid.cpg"
+            },
+            {
+                "OnCreatorPath" : "C:\\Users\\tporyvaev\\Documents\\alm_liquid.dbf",
+                "RelativeUserPath" : "Documents\\alm_liquid.dbf"
+            },
+            {
+                "OnCreatorPath" : "C:\\Users\\tporyvaev\\Documents\\alm_liquid.prj",
+                "RelativeUserPath" : "Documents\\alm_liquid.prj"
+            },
+            {
+                "OnCreatorPath" : "C:\\Users\\tporyvaev\\Documents\\alm_liquid.shp",
+                "RelativeUserPath" : "Documents\\alm_liquid.shp"
+            },
+            {
+                "OnCreatorPath" : "C:\\Users\\tporyvaev\\Documents\\alm_liquid.shx",
+                "RelativeUserPath" : "Documents\\alm_liquid.shx"
+            }
+        ]
+    }
+}

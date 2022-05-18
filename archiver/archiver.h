@@ -7,7 +7,7 @@
 #include <fstream>
 #include <cstring>
 
-#include "../lz4/lz4/lib/lz4.h"
+#include "../external_libs/lib_lz4/lz4.h"
 #include "archive_structs.h"
 #include "../shared/liblog.h"
 
@@ -87,9 +87,9 @@ namespace archiver
 
             
         private:
-            const char *DataSection = "const uint8_t data[] = {";
-            const char *FileControlSection = "const uint8_t control[] = {";
-            const char *ArchiveControlSection = "const uint8_t archive[] = {";
+            const char *DataSection = "const char data[] = {";
+            const char *FileControlSection = "const char control[] = {";
+            const char *ArchiveControlSection = "const char archive[] = {";
             const char *SectionEnd = "};\n";
 
             bool new_section = false;

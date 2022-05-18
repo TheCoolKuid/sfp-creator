@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "../archiver/archiver.h"
-#include "../lz4/lz4/lib/lz4file.h"
+#include "../external_libs/lib_lz4/lz4file.h"
 #include "archive.h"
 
 namespace Unpacker

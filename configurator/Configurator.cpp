@@ -63,4 +63,18 @@ int
          return -1;
     }
 
+    LibLog::LogEngine::LogConsoleInfo("Config successfully read");
+    LibLog::LogEngine::LogConsoleInfo("Packing");
+
+    archiver::ArchiveBuilder builder;
+    try {
+        builder.AddFiles(config.files);
+    } catch(const std::exception& err) {
+        LibLog::LogEngine::LogConsoleError("Some errors during archivation occurred. Error:", err.what());
+        return -1;
+    }
+
+    LibLog::LogEngine::LogConsoleInfo("Packing successfully done");
+
+    return 0;
 }

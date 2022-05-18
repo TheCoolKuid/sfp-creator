@@ -14,7 +14,7 @@
     do                                                                             \
     {                                                                              \
         LibLog::LogEngine::Log(std::cout,                                          \
-                               "[", LibLog::LogEngine::GetISOTime(), "] [DEBUG] ", \
+                               "[DEBUG] ", \
                                "File ", __FILE__,                                  \
                                " Line ", __LINE__,                                 \
                                " Msg: ", string);                                  \
@@ -51,16 +51,6 @@ namespace LibLog
             LogTag(std::cerr, "Warn", val, rest...);
         }
 
-        static std::string GetISOTime()
-        {
-            auto now_t = std::time(nullptr);
-            ;
-            auto now_tm = std::localtime(&now_t);
-            char buffer[256];
-            std::strftime(buffer, 256, "%F %T", now_tm);
-            return buffer;
-        }
-
     private:
         static void Log(std::ostream &stream)
         {
@@ -70,7 +60,7 @@ namespace LibLog
         template <typename T, typename... TArgs>
         static void LogTag(std::ostream &stream, std::string tag, T val, TArgs... rest)
         {
-            stream << "[" << GetISOTime() << "][" << tag << "] ";
+            stream << "[" << tag << "] ";
             Log(stream, val, rest...);
             stream << "\n";
         }
