@@ -3,7 +3,7 @@
 #include <string>
 #include <filesystem>
 
-#include "archiver.h"
+#include "patcher.h"
 #include "../archiver/archiver.h"
 #include "../shared/path_lib.h"
 
@@ -21,7 +21,7 @@ namespace Unpacker
         LZ4F_errorCode_t ret = LZ4F_OK_NoError;
         LZ4_readFile_t *lz4fRead;
 
-        constexpr uint8_t buf_size = 1024;
+        constexpr uint16_t buf_size = 1024;
         auto buffer = std::make_unique<char[]>(buf_size);
 
         if (LZ4F_isError(LZ4F_readOpen(&lz4fRead, tmp)))
@@ -85,6 +85,7 @@ namespace Unpacker
                     ptr->relative_path,
                     err.what());
             }
+
             auto path = HandleFile(ptr->offset, ptr->compressedSize, ptr->relative_path);
 
             if (!IsFileCorrect(path, ptr))

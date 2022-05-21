@@ -1,4 +1,3 @@
-#include <filesystem>
 #include "archiver.h"
 
 archiver::archiver::CompressedDataDefinition
@@ -15,7 +14,7 @@ archiver::archiver::compress(const std::filesystem::path &f_name)
             " does not exist.");
     }
     // file size in bytes
-    size_t f_size{fs::file_size(f_name)};
+    auto f_size{fs::file_size(f_name)};
 
     auto f_content = std::make_unique<char[]>(f_size);
 

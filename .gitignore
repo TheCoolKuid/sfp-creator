@@ -3,6 +3,8 @@ build
 configurator/build
 .vscode
 lz4
+CMakeFiles
+ProgramRelease
 # Prerequisites
 *.d
 
@@ -58,3 +60,17 @@ dkms.conf
 build
 .vs
 CMakeSettings.json
+.gitignore
+tests/path_test/CTestTestfile.cmake
+tests/path_test/cmake_install.cmake
+tests/patcher_test/Makefile
+tests/path_test/Makefile
+tests/patcher_test/CTestTestfile.cmake
+tests/patcher_test/cmake_install.cmake
+tests/json_test/Makefile
+tests/json_test/CTestTestfile.cmake
+tests/json_test/cmake_install.cmake
+tests/archiver_test/Makefile
+tests/archiver_test/CTestTestfile.cmake
+tests/archiver_test/cmake_install.cmake
+archiver/Makefile

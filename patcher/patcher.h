@@ -1,19 +1,14 @@
-#include <cstdint>
 #include <filesystem>
 #include <vector>
 
 #include "../archiver/archiver.h"
-#include "../lz4/lz4/lib/lz4file.h"
-
-extern const std::uint8_t data[]; // vector of compressed bytes --- stack of compressed files
-extern const uint8_t control[];   // vector of structs FileMemoryDefinition_t
-extern const uint8_t archive[];   // two size_t values representing FileArchiveDefinition_t struct
+#include "../external_libs/lib_lz4/lz4file.h"
+#include "archive.h"
 
 namespace Unpacker
 {
     class Unpacker
     {
-
     public:
         /**
          * @brief Structure describing uncompressed file and success of uncompress
