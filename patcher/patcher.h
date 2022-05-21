@@ -1,8 +1,12 @@
+#ifndef PATCHER_H
+#define PATCHER_H
 #include <filesystem>
 #include <vector>
+#include <string>
 
 #include "../archiver/archiver.h"
 #include "../external_libs/lib_lz4/lz4file.h"
+#include "../shared/path_lib.h"
 #include "archive.h"
 
 namespace Unpacker
@@ -60,3 +64,4 @@ namespace Unpacker
         void RestoreFile(const char *relative_path);
     };
 } // Unpacker
+#endif

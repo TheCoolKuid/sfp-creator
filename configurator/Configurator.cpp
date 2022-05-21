@@ -4,6 +4,7 @@
 #include "../shared/path_lib.h"
 #include "../shared/utils.h"
 #include "config/Config.h"
+#include "run/Run.h"
 
 
 int
@@ -75,6 +76,16 @@ int
     }
 
     LibLog::LogEngine::LogConsoleInfo("Packing successfully done");
+    LibLog::LogEngine::LogConsoleInfo("Building patch");
 
-    return 0;
+    Runner::Script script(PathUtils::Path::Append(PathUtils::Path::GetDir(argv[0]), "cmd.cmd"));
+    script.AddCommand("cmake -S./patcher -B./patcher/build");
+    script.AddCommand("cmake --build  ./patcher/build --config Debug");    
+    if(script.Execute()) {
+        LibLog::LogEngine::LogConsoleInfo("Building successful");
+        return 0;
+    } else {
+        LibLog::LogEngine::LogConsoleError("error");
+        return -1;
+    }
 }

@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.8)
 
 project(patcher)
 
-set(CPPS patcher.cpp)
+set(CPPS main.cpp patcher.cpp)
 
-add_library(patcher STATIC ${CPPS})
+add_executable(patcher ${CPPS})
 
 target_compile_features(patcher PRIVATE cxx_std_17)
 

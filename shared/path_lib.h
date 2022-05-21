@@ -15,6 +15,10 @@ namespace PathUtils
             return new_path;
         }
 
+        static std::filesystem::path GetDir(const std::filesystem::path &origin) {
+            return std::filesystem::path(origin).remove_filename();
+        }
+
     private:
         const static char WinSep = '\\';
         const static char UnixSep = '/';

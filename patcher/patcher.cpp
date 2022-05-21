@@ -1,11 +1,4 @@
-#include <vector>
-#include <exception>
-#include <string>
-#include <filesystem>
-
 #include "patcher.h"
-#include "../archiver/archiver.h"
-#include "../shared/path_lib.h"
 
 namespace Unpacker
 {

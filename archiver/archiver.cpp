@@ -240,4 +240,6 @@ void archiver::ArchiveBuilder::AddFiles(const std::vector<ArchiveBuilder::FileRe
 
     writer->AddSection(ArchiveBuilder::ArchiveWriter::Sections::ArchiveControl);
     writer->WriteToSection(reinterpret_cast<char *>(&files_def), sizeof(FileArchiveDefinition_t));
+
+    archive_file.close();
 }

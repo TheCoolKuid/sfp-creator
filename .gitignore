@@ -74,3 +74,5 @@ tests/archiver_test/Makefile
 tests/archiver_test/CTestTestfile.cmake
 tests/archiver_test/cmake_install.cmake
 archiver/Makefile
+1
+test.diff
