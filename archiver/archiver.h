@@ -84,7 +84,9 @@ namespace archiver
             ~ArchiveWriter();
 
             void AddSection(Sections sec);
+            void EndSection();
             void WriteToSection(char* ptr, size_t size);
+            
 
             
         private:

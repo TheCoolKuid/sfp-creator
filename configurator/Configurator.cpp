@@ -5,7 +5,7 @@
 #include "../shared/utils.h"
 #include "config/Config.h"
 #include "run/Run.h"
-
+#include "utils/Utils.h"
 
 int
 #if defined(unix) || defined(__unix__) || defined(__unix)
@@ -20,11 +20,12 @@ int
         char
 #endif
 #if defined(_WIN32) || defined(__CYGWIN__)
-        wchar_t
+            wchar_t
 #endif
-        **argv)
+                **argv)
 {
-    if(HasAdminRights()) {
+    if (HasAdminRights())
+    {
         LibLog::LogEngine::LogConsoleWarn("Program runs with admin privileges. Hope you know what you doing");
     }
 
@@ -59,18 +60,22 @@ int
     auto config = parser.Create();
 
     SFPConfig::RuleChecker checker;
-    if(!checker.Check(config)) {
-         LibLog::LogEngine::LogConsoleError("Invalid config. Please check and try again.");
-         return -1;
+    if (!checker.Check(config))
+    {
+        LibLog::LogEngine::LogConsoleError("Invalid config. Please check and try again.");
+        return -1;
     }
 
     LibLog::LogEngine::LogConsoleInfo("Config successfully read");
     LibLog::LogEngine::LogConsoleInfo("Packing");
 
     archiver::ArchiveBuilder builder;
-    try {
+    try
+    {
         builder.AddFiles(config.files);
-    } catch(const std::exception& err) {
+    }
+    catch (const std::exception &err)
+    {
         LibLog::LogEngine::LogConsoleError("Some errors during archivation occurred. Error:", err.what());
         return -1;
     }
@@ -78,14 +83,28 @@ int
     LibLog::LogEngine::LogConsoleInfo("Packing successfully done");
     LibLog::LogEngine::LogConsoleInfo("Building patch");
 
-    Runner::Script script(PathUtils::Path::Append(PathUtils::Path::GetDir(argv[0]), "cmd.cmd"));
-    script.AddCommand("cmake -S./patcher -B./patcher/build");
-    script.AddCommand("cmake --build  ./patcher/build --config Debug");    
-    if(script.Execute()) {
-        LibLog::LogEngine::LogConsoleInfo("Building successful");
-        return 0;
-    } else {
-        LibLog::LogEngine::LogConsoleError("error");
-        return -1;
+    Runner::BuildSystemScript build_script(PathUtils::Path::GetDir(argv[0]));
+    try
+    {
+        build_script.Exec();
     }
+    catch (std::exception err)
+    {
+        LibLog::LogEngine::LogConsoleError(err.what());
+    }
+
+    LibLog::LogEngine::LogConsoleInfo("Building done");
+    LibLog::LogEngine::LogConsoleInfo("Copying patch");
+
+    std::error_code copy_error;
+    if(!ConfiguratorUtils::FSUtis::CopyExecutable(
+        "./patcher/build/Debug/patcher.exe", 
+        "./",
+        config.executable_name, 
+        copy_error)) {
+        LibLog::LogEngine::LogConsoleError("Some error during copying is occurred. Error:", copy_error.message());
+    }
+
+    LibLog::LogEngine::LogConsoleInfo("Copying done. Your patch file is available at ./", config.executable_name);
+    LibLog::LogEngine::LogConsoleInfo("All done");
 }

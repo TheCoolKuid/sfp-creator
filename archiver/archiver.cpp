@@ -221,10 +221,7 @@ void archiver::ArchiveBuilder::ArchiveWriter::WriteByte(char *ptr)
 bool IsDestruct = false;
 archiver::ArchiveBuilder::ArchiveWriter::~ArchiveWriter()
 {
-    if (new_section)
-    {
-        WriteServiceInfo(SectionEnd);
-    }
+    EndSection();
 }
 
 void archiver::ArchiveBuilder::AddFiles(const std::vector<ArchiveBuilder::FileReplacmentConfig> &config)
@@ -240,6 +237,14 @@ void archiver::ArchiveBuilder::AddFiles(const std::vector<ArchiveBuilder::FileRe
 
     writer->AddSection(ArchiveBuilder::ArchiveWriter::Sections::ArchiveControl);
     writer->WriteToSection(reinterpret_cast<char *>(&files_def), sizeof(FileArchiveDefinition_t));
+    writer->EndSection();
 
     archive_file.close();
+}
+
+void archiver::ArchiveBuilder::ArchiveWriter::EndSection() {
+    if (new_section)
+    {
+        WriteServiceInfo(SectionEnd);
+    }
 }

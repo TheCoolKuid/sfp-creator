@@ -62,7 +62,6 @@ namespace LibLog
         {
             stream << "[" << tag << "] ";
             Log(stream, val, rest...);
-            stream << "\n";
         }
     };
 }

@@ -12,7 +12,6 @@ endif()
 
 add_subdirectory(external_libs)
 add_subdirectory(archiver)
-add_subdirectory(patcher)
 
 add_subdirectory(configurator)
 

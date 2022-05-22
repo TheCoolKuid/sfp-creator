@@ -1,5 +1,6 @@
 #ifndef PATCHER_H
 #define PATCHER_H
+
 #include <filesystem>
 #include <vector>
 #include <string>

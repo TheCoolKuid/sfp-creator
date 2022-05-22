@@ -36,8 +36,8 @@ if ($m.Length -eq 0) {
     $m = "Debug"
 }
 
-Write-Output "[builder] Removing old release"
-Remove-Item -LiteralPath ./ProgramRelease -Force -Recurse
+#Write-Output "[builder] Removing old release"
+#Remove-Item -LiteralPath ./ProgramRelease -Force -Recurse
 
 Write-Output "[builder] Creating neccessary dirs"
 new-item -Name ./ProgramRelease -ItemType directory
@@ -71,6 +71,7 @@ Copy-Item -Path "./ProgramRelease/build/archiver/$m/archiver.dll" -Destination "
 Copy-Item -Path "./ProgramRelease/build/external_libs/lib_lz4/$m/lz4.dll" -Destination "ProgramRelease/"
 
 Write-Output "[builder] Copying patcher"
+Remove-Item -LiteralPath ./ProgramRelease/patcher -Force -Recurse
 Copy-Item -Path "./patcher" -Destination "ProgramRelease/" -Recurse
 
 Write-Output "[builder] Copying patcher dependencies"
@@ -90,10 +91,12 @@ new-item -Name ./ProgramRelease/external_libs/lib_lz4 -ItemType directory
 
 Copy-Item -Path "./archiver/*.h" -Destination "ProgramRelease/archiver" -Recurse
 Copy-Item -Path "./external_libs/lib_lz4/*.h" -Destination "ProgramRelease/external_libs/lib_lz4" -Recurse
-Copy-Item -Path "./shared" -Destination "ProgramRelease/shared" -Recurse
 
-Write-Output "[builder] Clean up"
-Remove-Item -LiteralPath ./ProgramRelease/build -Force -Recurse
+Remove-Item -LiteralPath ./ProgramRelease/shared -Force -Recurse
+Copy-Item -Path "./shared" -Destination "ProgramRelease" -Recurse
+
+#Write-Output "[builder] Clean up"
+#Remove-Item -LiteralPath ./ProgramRelease/build -Force -Recurse
 
 Write-Output "[builder] Creating changelog.txt"
 Start-Process -FilePath "git" -ArgumentList 'log','--pretty="%ai %aN - %s"' -NoNewWindow -Wait -RedirectStandardOutput './ProgramRelease/changelog.txt'

@@ -43,6 +43,16 @@ namespace Unpacker
         }
 
         auto path = PathUtils::Path::Append(user_path, relative_path);
+        //create all dir on path if its necessary
+        auto dir_path = PathUtils::Path::GetDir(path);
+        if(!std::filesystem::exists(dir_path)) {
+            std::error_code perr;
+            if(!std::filesystem::create_directories(dir_path, perr)) {
+                throw std::runtime_error(
+                    "unable to create directories at path:" + dir_path.string() + " Error:" + perr.message());
+            }
+        }
+
         std::ofstream out(path); //< where to write the decompssed file on disk
 
         DecompressFile(tmp, out);

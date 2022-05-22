@@ -2,6 +2,11 @@
 #define RUN_H
 #include <fstream>
 #include <filesystem>
+#include <string>
+
+#include "../../shared/liblog.h"
+#include "../../shared/path_lib.h"
+
 namespace Runner {
     class RunScript {
         public:
@@ -18,6 +23,19 @@ namespace Runner {
         private:
             std::ofstream stream;
             std::filesystem::path _Path;
+    };
+
+    class ISystemScript {
+        public:
+            virtual void Exec() = 0;
+    };
+
+    class BuildSystemScript : public ISystemScript {
+        public:
+            BuildSystemScript(const std::filesystem::path& Folder) : ScriptFolder{Folder} {}
+            virtual void Exec();
+        private:
+            std::filesystem::path ScriptFolder;
     };
 }
 #endif

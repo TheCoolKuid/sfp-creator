@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 
 project(Configurator)
 
-set(CPPS Configurator.cpp config/Config.cpp run/Run.cpp)
+set(CPPS Configurator.cpp config/Config.cpp run/Run.cpp utils/Utils.cpp)
 
 add_executable(Configurator ${CPPS})
 
