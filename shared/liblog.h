@@ -51,6 +51,15 @@ namespace LibLog
             LogTag(std::cerr, "Warn", val, rest...);
         }
 
+        template <typename T, typename... TArgs>
+        static void LogConsoleDebug(T val, TArgs... rest)
+        {
+            #ifndef NDEGUB
+                LogTag(std::cerr, "DEBUG", val, rest...);
+            #else
+            #endif
+        }
+
     private:
         static void Log(std::ostream &stream)
         {

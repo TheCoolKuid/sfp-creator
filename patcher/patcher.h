@@ -46,7 +46,7 @@ namespace Unpacker
          * @param tmp compressed temporary file descriptor
          * @param file output stream binded to the decompressed location
          */
-        void DecompressFile(FILE *tmp, std::ofstream &file);
+        void DecompressFile(std::ofstream &file, const char* src, size_t compressedSize, size_t originSize);
 
         /**
          * @brief handles a single compressed file: copies it from archive.c to temp and
@@ -57,7 +57,7 @@ namespace Unpacker
          * @param relative_path relative path to the patch file destination
          * @return complete path to the patched file on user computer
          */
-        std::filesystem::path HandleFile(size_t offset, size_t size, const char *relative_path);
+        std::filesystem::path HandleFile(size_t offset, size_t size, size_t originSize, const char *relative_path);
 
         bool IsFileCorrect(const std::filesystem::path &path, const FileMemoryDefinition *compressedfile);
 

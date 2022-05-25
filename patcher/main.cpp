@@ -36,7 +36,12 @@ int
     LibLog::LogEngine::LogConsoleInfo("Unpacking");
 
     Unpacker::Unpacker ArchiveHandler{path};
-    ArchiveHandler.Unpack();
+    try{ 
+        ArchiveHandler.Unpack();
+    }catch(std::exception err) {
+        LibLog::LogEngine::LogConsoleError("Some error during unpacking occured. Error:", err.what());
+        return -1;
+    }
 
     LibLog::LogEngine::LogConsoleInfo("Unpacking done");
     return 0;

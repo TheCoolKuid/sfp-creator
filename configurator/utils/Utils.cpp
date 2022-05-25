@@ -29,5 +29,5 @@ bool ConfiguratorUtils::FSUtis::CopyExecutable(
                                  std::filesystem::perm_options::add);
 #endif
 
-    return result;
+    return !perr;
 }

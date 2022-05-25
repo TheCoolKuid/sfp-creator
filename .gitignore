@@ -5,6 +5,8 @@ configurator/build
 lz4
 CMakeFiles
 ProgramRelease
+node_modules
+tpf_temp
 # Prerequisites
 *.d
 

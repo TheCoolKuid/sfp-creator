@@ -7,10 +7,12 @@
 #include <fstream>
 #include <cstring>
 #include <vector>
+#include <string>
 
 #include "../external_libs/lib_lz4/lz4.h"
 #include "archive_structs.h"
 #include "../shared/liblog.h"
+#include "../external_libs/lib_lz4/lz4frame.h"
 
 namespace archiver
 {
@@ -54,6 +56,19 @@ namespace archiver
          * @param path path to the file
          */
         static unsigned int crc32b(const std::filesystem::path& path);
+
+        /**
+         * @brief Compress passed chunk in inBuffer and write to outBuffer
+         * 
+         * @param ctx valid LZ4F_compressionContext_t
+         * @param inBuffer src buffer
+         * @param outBuffer dest buffer
+         * @param inSize bytes size of chunk in inBuffer
+         * @param outCapacity bytes capacity of outBuffer
+         * @return size_t writted size
+         */
+        static size_t CompressChunk(LZ4F_compressionContext_t ctx, char* inBuffer,
+                                            char* outBuffer, size_t inSize, size_t outCapacity);
     };
 
     class ArchiveBuilder
@@ -72,6 +87,18 @@ namespace archiver
 
     private:
         void AddFile(const FileReplacmentConfig &conf);
+
+        archiver::CompressedDataDefinition CompressFileStream(const std::filesystem::path& path);
+        const size_t MAX_CHUNK_SIZE = 104857600ULL; //100 MB
+        const size_t MIN_CHUNK_SIZE = 1024ULL; //1KB
+        /**
+         * @brief Calculate chunk size based on file size
+         * set tenth part of file size or MIN_CHUNK_SIZE if it less than it
+         * if part way to big sets MAX_CHUNK_SIZE
+         * @param file_size 
+         * @return size_t 
+         */
+        size_t CalculateFileChunk(size_t file_size);
 
         class ArchiveWriter
         {
@@ -99,6 +126,7 @@ namespace archiver
             bool append_comma = false;
 
             std::ofstream& archive_file;
+            size_t WritedByteInSection = 0;
 
             void WriteServiceInfo(const char* ptr);
             void WriteByte(char* ptr);

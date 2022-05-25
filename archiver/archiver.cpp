@@ -137,7 +137,7 @@ void archiver::ArchiveBuilder::AddFile(const FileReplacmentConfig &conf)
 {
     try
     {
-        auto compressed = archiver::compress(conf.OnCreatorPath);
+        auto compressed = CompressFileStream(conf.OnCreatorPath);
 
         FileMemoryDefinition_t def;
         def.compressedSize = compressed.CompressedSize;
@@ -145,10 +145,10 @@ void archiver::ArchiveBuilder::AddFile(const FileReplacmentConfig &conf)
         def.originSize = compressed.OriginSize;
         def.crc32 = compressed.crc32;
         // set buffer with 0 and write data
-        memset(def.relative_path, 0, 256);
+        memset(def.relative_path, 0, sizeof(def.relative_path));
         memcpy(def.relative_path, conf.RelativeUserPath.c_str(), conf.RelativeUserPath.size());
 
-        writer->WriteToSection(compressed.data.get(), compressed.CompressedSize);
+        //writer->WriteToSection(compressed.data.get(), compressed.CompressedSize);
 
         files.push_back(std::move(def));
 
@@ -187,6 +187,7 @@ void archiver::ArchiveBuilder::ArchiveWriter::AddSection(ArchiveBuilder::Archive
         LOG_CONSOLE_DEBUG("unrecognised enum was passed to AddSection");
         break;
     }
+    WritedByteInSection = 0;
 }
 
 void archiver::ArchiveBuilder::ArchiveWriter::WriteServiceInfo(const char *ptr)
@@ -197,6 +198,9 @@ void archiver::ArchiveBuilder::ArchiveWriter::WriteServiceInfo(const char *ptr)
 
 void archiver::ArchiveBuilder::ArchiveWriter::WriteToSection(char *ptr, size_t size)
 {
+    if(size == 0ULL)
+        return;
+
     if (append_comma)
     {
         archive_file << ", ";
@@ -211,6 +215,8 @@ void archiver::ArchiveBuilder::ArchiveWriter::WriteToSection(char *ptr, size_t s
         WriteByte(ptr);
         ptr++;
     }
+
+    WritedByteInSection += size;
 }
 
 void archiver::ArchiveBuilder::ArchiveWriter::WriteByte(char *ptr)
@@ -247,4 +253,73 @@ void archiver::ArchiveBuilder::ArchiveWriter::EndSection() {
     {
         WriteServiceInfo(SectionEnd);
     }
+}
+
+size_t archiver::archiver::CompressChunk(LZ4F_compressionContext_t ctx, char *inBuffer,
+                                                char *outBuffer, size_t inSize, size_t outCapacity) {
+    size_t compressed = LZ4F_compressUpdate(ctx, outBuffer, outCapacity, inBuffer, inSize, NULL);
+    if(LZ4F_isError(compressed)) {
+        throw std::runtime_error("Unable to compress chunk. Err code:" + std::to_string(compressed));
+    }
+    return compressed;
+}
+
+archiver::archiver::CompressedDataDefinition archiver::ArchiveBuilder::CompressFileStream(const std::filesystem::path& path) {
+    size_t result_size = 0;
+    //create context
+    LZ4F_compressionContext_t ctx;
+    size_t const ctxCreation = LZ4F_createCompressionContext(&ctx, LZ4F_VERSION);
+    //select chunk size and allocate space for it
+    std::ifstream input(path, std::ios::binary);
+    size_t file_size = std::filesystem::file_size(path);
+    size_t chunk_size = CalculateFileChunk(file_size);
+    auto inBuffer = std::make_unique<char[]>(chunk_size);
+    //allocate space for outBuffer
+    size_t dest_size = LZ4F_compressBound(chunk_size, NULL);
+    auto outBuffer = std::make_unique<char[]>(dest_size);
+    //begin compression
+    const size_t header_size = LZ4F_compressBegin(ctx, outBuffer.get(), dest_size, NULL);
+    if(LZ4F_isError(header_size)) {
+        throw std::runtime_error("Unable to begin compression");
+    }
+    //write header 
+    writer->WriteToSection(outBuffer.get(), header_size);
+    result_size += header_size;
+
+    LibLog::LogEngine::LogConsoleDebug("File ", path, " File size ", file_size, " Chunk size ", chunk_size, " dest size ", dest_size);
+
+    size_t read = 0;
+    do {
+        //read and get read bytes
+        input.read(inBuffer.get(), chunk_size);
+        read = input.gcount();
+        //compress and write
+        size_t compressed = archiver::CompressChunk(ctx, inBuffer.get(), outBuffer.get(), read, dest_size);
+        writer->WriteToSection(outBuffer.get(), compressed);
+        result_size += compressed;
+
+    } while (read != 0);
+
+    //end compression
+    const size_t flushed = LZ4F_compressEnd(ctx, outBuffer.get(), dest_size, NULL);
+    if(LZ4F_isError(flushed)) {
+        throw std::runtime_error("Unable to end compression");
+    }
+    writer->WriteToSection(outBuffer.get(), flushed);
+    result_size += flushed;
+
+    //release ctx
+    LZ4F_freeCompressionContext(ctx); 
+
+    input.close();
+
+    archiver::archiver::CompressedDataDefinition out;
+    out.CompressedSize = result_size;
+    out.OriginSize = file_size;
+    out.crc32 = archiver::crc32b(path);
+    return out;
+}
+
+size_t archiver::ArchiveBuilder::CalculateFileChunk(size_t file_size) {
+    return std::min(std::max(MIN_CHUNK_SIZE, file_size / 10ULL), MAX_CHUNK_SIZE);
 }

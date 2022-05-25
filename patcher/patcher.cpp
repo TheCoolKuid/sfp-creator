@@ -6,9 +6,12 @@ namespace Unpacker
     {
     }
 
-    void Unpacker::DecompressFile(FILE *tmp, std::ofstream &file)
+    void Unpacker::DecompressFile(std::ofstream &file, const char *src, size_t compressedSize, size_t originSize)
     {
-        if (!file.is_open()) //< the output file strem must be opened before writing into it
+        auto buffer = archiver::archiver::decompress(src, compressedSize, originSize);
+        file.write(buffer.get(), originSize);
+
+        /*if (!file.is_open()) //< the output file strem must be opened before writing into it
             throw std::runtime_error("The outpu file stream is not open. Cannot write to it.");
 
         LZ4F_errorCode_t ret = LZ4F_OK_NoError;
@@ -30,24 +33,33 @@ namespace Unpacker
 
             read_count += read_size;             //< this amont of bytes is already read
             file.write(buffer.get(), read_size); //< write the next chunk of bytes
-        }
+        }*/
         // file.close(); //< it is not the responsibility of this methd to close the output stream
     }
 
-    std::filesystem::path Unpacker::HandleFile(size_t offset, size_t size, const char *relative_path)
+    std::filesystem::path Unpacker::HandleFile(size_t offset, size_t size, size_t originSize, const char *relative_path)
     {
-        auto tmp = std::tmpfile(); //< create temprary file to move compressed data from archive.c
-        if (fwrite(&data[0] + offset, 1, size, tmp) != size)
+        /*auto tmp = std::tmpfile(); //< create temprary file to move compressed data from archive.c
+        if(tmp == NULL) {
+            throw std::runtime_error("Unable to create temp file");
+        }
+        if (fwrite(data + offset, sizeof(data[0]), size, tmp) != size)
         {
             throw std::runtime_error("Unable to write compressed data at offset position = " + std::to_string(offset) + ".");
         }
+        if(fflush(tmp) || fseek(tmp, 0, SEEK_SET)) {
+            throw std::runtime_error("Unable to flush temp file");
+        }*/
 
         auto path = PathUtils::Path::Append(user_path, relative_path);
-        //create all dir on path if its necessary
+        // create all dir on path if its necessary
         auto dir_path = PathUtils::Path::GetDir(path);
-        if(!std::filesystem::exists(dir_path)) {
+        if (!std::filesystem::exists(dir_path))
+        {
             std::error_code perr;
-            if(!std::filesystem::create_directories(dir_path, perr)) {
+            std::filesystem::create_directories(dir_path, perr);
+            if (perr)
+            {
                 throw std::runtime_error(
                     "unable to create directories at path:" + dir_path.string() + " Error:" + perr.message());
             }
@@ -55,9 +67,9 @@ namespace Unpacker
 
         std::ofstream out(path); //< where to write the decompssed file on disk
 
-        DecompressFile(tmp, out);
+        DecompressFile(out, data + offset, size, originSize);
 
-        fclose(tmp);
+        // fclose(tmp);
         out.close();
 
         return path;
@@ -89,7 +101,7 @@ namespace Unpacker
                     err.what());
             }
 
-            auto path = HandleFile(ptr->offset, ptr->compressedSize, ptr->relative_path);
+            auto path = HandleFile(ptr->offset, ptr->compressedSize, ptr->originSize, ptr->relative_path);
 
             if (!IsFileCorrect(path, ptr))
             {
@@ -124,10 +136,13 @@ namespace Unpacker
     void Unpacker::BackUpFile(const char *relative_path)
     {
         auto old_path = PathUtils::Path::Append(user_path, relative_path);
-        auto new_path = PathUtils::Path::Append(old_path, ".bal");
-        if (!std::filesystem::copy_file(old_path, new_path))
+        if (std::filesystem::exists(old_path))
         {
-            throw std::runtime_error("unable to create backup file");
+            auto new_path = PathUtils::Path::Append(old_path, ".bal");
+            if (!std::filesystem::copy_file(old_path, new_path))
+            {
+                throw std::runtime_error("unable to create backup file");
+            }
         }
     }
 
@@ -142,10 +157,6 @@ namespace Unpacker
             {
                 throw std::runtime_error("unable to delete backup file");
             }
-        }
-        else
-        {
-            throw std::runtime_error("backup file not found");
         }
     }
 } // Unpacker

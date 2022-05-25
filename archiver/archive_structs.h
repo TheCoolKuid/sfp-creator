@@ -6,7 +6,7 @@ typedef struct FileMemoryDefinition
     size_t offset = 0;         // offset in data struct
     size_t compressedSize = 0; // byte size of block
     size_t originSize = 0;     // origin size of uncompressed file
-    char relative_path[256];   // relative path
+    char relative_path[128];   // relative path
 } FileMemoryDefinition_t;
 
 typedef struct FileArchiveDefinition
